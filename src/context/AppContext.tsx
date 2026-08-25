@@ -16,8 +16,11 @@ interface AppContextValue {
   findRecruitByName: (name: string) => Recruit | undefined;
   searchRecruits: (query: string) => Recruit[];
 
+  // FTO lookups
+  searchFtos: (query: string) => FTO[];
+
   // FTO actions
-  addFto: (name: string, discordUsername?: string) => void;
+  addFto: (name: string, discordUsername?: string) => FTO;
   updateFto: (id: string, patch: Partial<FTO>) => void;
   removeFto: (id: string) => void;
 
@@ -81,8 +84,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  const searchFtos: AppContextValue['searchFtos'] = (query) => {
+    const q = query.trim().toLowerCase();
+    const active = state.ftos.filter((f) => f.active);
+    if (!q) return active;
+    return active.filter(
+      (f) => f.name.toLowerCase().includes(q) || (f.discordUsername ?? '').toLowerCase().includes(q)
+    );
+  };
+
   const addFto: AppContextValue['addFto'] = (name, discordUsername) => {
-    setState((prev) => ({ ...prev, ftos: [...prev.ftos, makeFto(name, discordUsername)] }));
+    const fto = makeFto(name, discordUsername);
+    setState((prev) => ({ ...prev, ftos: [...prev.ftos, fto] }));
+    return fto;
   };
 
   const updateFto: AppContextValue['updateFto'] = (id, patch) => {
@@ -228,6 +242,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       state,
       findRecruitByName,
       searchRecruits,
+      searchFtos,
       addFto,
       updateFto,
       removeFto,

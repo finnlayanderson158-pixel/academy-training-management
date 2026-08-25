@@ -6,22 +6,30 @@ import PageHeader from '../components/PageHeader';
 type Step = 'recruit' | 'fto' | 'training' | 'done';
 
 export default function FtoUpload() {
-  const { state, searchRecruits, createRecruitFromFto, logStandardTraining, logRideAlong } = useApp();
+  const { state, searchRecruits, searchFtos, createRecruitFromFto, addFto, logStandardTraining, logRideAlong } =
+    useApp();
 
   const [step, setStep] = useState<Step>('recruit');
   const [query, setQuery] = useState('');
   const [selectedRecruitId, setSelectedRecruitId] = useState<string | null>(null);
-  const [selectedFtoId, setSelectedFtoId] = useState<string>('');
   const [showNotFound, setShowNotFound] = useState(false);
+
+  const [ftoQuery, setFtoQuery] = useState('');
+  const [selectedFtoId, setSelectedFtoId] = useState<string>('');
+  const [showFtoNotFound, setShowFtoNotFound] = useState(false);
 
   const matches = useMemo(() => {
     if (!query.trim()) return [];
     return searchRecruits(query).slice(0, 8);
   }, [query, state.recruits]);
 
+  const ftoMatches = useMemo(() => {
+    if (!ftoQuery.trim()) return [];
+    return searchFtos(ftoQuery).slice(0, 8);
+  }, [ftoQuery, state.ftos]);
+
   const selectedRecruit = state.recruits.find((r) => r.id === selectedRecruitId) ?? null;
   const selectedFto = state.ftos.find((f) => f.id === selectedFtoId) ?? null;
-  const activeFtos = state.ftos.filter((f) => f.active);
 
   function handleSearchChange(value: string) {
     setQuery(value);
@@ -48,9 +56,31 @@ export default function FtoUpload() {
     pickRecruit(recruit.id);
   }
 
+  function handleFtoSearchChange(value: string) {
+    setFtoQuery(value);
+    setShowFtoNotFound(false);
+  }
+
+  function handleFtoSearchSubmit() {
+    const exact = state.ftos.find(
+      (f) => f.active && f.name.trim().toLowerCase() === ftoQuery.trim().toLowerCase()
+    );
+    if (exact) {
+      pickFto(exact.id);
+    } else if (ftoQuery.trim()) {
+      setShowFtoNotFound(true);
+    }
+  }
+
   function pickFto(id: string) {
     setSelectedFtoId(id);
+    setShowFtoNotFound(false);
     setStep('training');
+  }
+
+  function handleCreateFto() {
+    const fto = addFto(ftoQuery.trim());
+    pickFto(fto.id);
   }
 
   function saveTraining(field: StandardTrainingKey | 'rideAlong') {
@@ -67,8 +97,10 @@ export default function FtoUpload() {
     setStep('recruit');
     setQuery('');
     setSelectedRecruitId(null);
-    setSelectedFtoId('');
     setShowNotFound(false);
+    setFtoQuery('');
+    setSelectedFtoId('');
+    setShowFtoNotFound(false);
   }
 
   return (
@@ -132,20 +164,38 @@ export default function FtoUpload() {
                 Training: <strong>{selectedRecruit?.name}</strong>
               </div>
               <label className="block text-lg font-bold text-slate-800">Who are you?</label>
-              <div className="grid grid-cols-1 gap-2">
-                {activeFtos.map((f) => (
-                  <button
-                    key={f.id}
-                    onClick={() => pickFto(f.id)}
-                    className="w-full text-left px-4 py-3 text-base font-medium rounded-xl border-2 border-slate-200 hover:border-sky-500 hover:bg-sky-50"
-                  >
-                    {f.name}
-                  </button>
-                ))}
-                {activeFtos.length === 0 && (
-                  <p className="text-sm text-slate-500">No active FTOs configured yet. Ask a Supervisor to add one.</p>
-                )}
+              <div className="flex gap-2">
+                <input
+                  autoFocus
+                  value={ftoQuery}
+                  onChange={(e) => handleFtoSearchChange(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleFtoSearchSubmit()}
+                  placeholder="Type your name..."
+                  className="flex-1 border-2 border-slate-300 rounded-xl px-4 py-3 text-lg focus:outline-none focus:ring-4 focus:ring-sky-200 focus:border-sky-500"
+                />
               </div>
+
+              {ftoMatches.length > 0 && (
+                <div className="border border-slate-200 rounded-xl divide-y divide-slate-100 overflow-hidden">
+                  {ftoMatches.map((f) => (
+                    <button
+                      key={f.id}
+                      onClick={() => pickFto(f.id)}
+                      className="w-full text-left px-4 py-3 text-base font-medium hover:bg-sky-50"
+                    >
+                      {f.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <button
+                onClick={handleFtoSearchSubmit}
+                disabled={!ftoQuery.trim()}
+                className="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold text-lg py-3 rounded-xl disabled:bg-slate-300"
+              >
+                Continue
+              </button>
             </div>
           )}
 
@@ -214,6 +264,32 @@ export default function FtoUpload() {
                 className="px-4 py-2 text-sm font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700"
               >
                 Create Recruit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showFtoNotFound && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <h3 className="text-lg font-bold text-slate-800 mb-2">FTO Not Found</h3>
+            <p className="text-sm text-slate-600 mb-5">
+              "{ftoQuery.trim()}" is not currently listed as an FTO. Add yourself so this training can be logged
+              under your name?
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowFtoNotFound(false)}
+                className="px-4 py-2 text-sm rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateFto}
+                className="px-4 py-2 text-sm font-semibold rounded-lg bg-sky-600 text-white hover:bg-sky-700"
+              >
+                Add Me as FTO
               </button>
             </div>
           </div>
