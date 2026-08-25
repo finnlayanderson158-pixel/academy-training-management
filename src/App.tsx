@@ -1,7 +1,7 @@
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
-import Navbar from './components/Navbar';
 import Spreadsheet from './pages/Spreadsheet';
+import FtoUpload from './pages/FtoUpload';
 import Admin from './pages/Admin';
 
 export default function App() {
@@ -9,9 +9,9 @@ export default function App() {
     <AppProvider>
       <HashRouter>
         <div className="min-h-screen bg-[#0b1220]">
-          <Navbar />
           <Routes>
             <Route path="/" element={<Spreadsheet />} />
+            <Route path="/fto" element={<FtoUpload />} />
             <Route path="/admin" element={<Admin />} />
           </Routes>
         </div>

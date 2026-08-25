@@ -18,7 +18,7 @@ export default function AddRecruitModal({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
         <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
-          <h2 className="font-semibold text-lg text-slate-800">Add Recruit</h2>
+          <h2 className="font-semibold text-lg text-slate-800">Recruit Intake</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-700 text-xl leading-none">
             &times;
           </button>

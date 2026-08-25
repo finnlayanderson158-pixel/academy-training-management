@@ -3,22 +3,14 @@ import type {
   AppState,
   FTO,
   Recruit,
-  Role,
   StandardTrainingKey,
   TrainingHistoryEntry,
 } from '../types';
 import { RIDE_ALONGS_REQUIRED, STANDARD_TRAININGS } from '../types';
 import { loadState, makeFto, makeRecruit, saveState, uid } from '../lib/storage';
 
-interface AuthState {
-  role: Role;
-  ftoId: string | null; // when role === 'fto', which FTO is "logged in"
-}
-
 interface AppContextValue {
   state: AppState;
-  auth: AuthState;
-  setAuth: (auth: AuthState) => void;
 
   // Recruit lookups
   findRecruitByName: (name: string) => Recruit | undefined;
@@ -61,7 +53,6 @@ const fieldLabels: Record<string, string> = {
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AppState>(() => loadState());
-  const [auth, setAuth] = useState<AuthState>({ role: 'admin', ftoId: null });
 
   useEffect(() => {
     saveState(state);
@@ -235,8 +226,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<AppContextValue>(
     () => ({
       state,
-      auth,
-      setAuth,
       findRecruitByName,
       searchRecruits,
       addFto,
@@ -250,7 +239,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       logRideAlong,
       historyForRecruit,
     }),
-    [state, auth]
+    [state]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

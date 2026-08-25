@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { RIDE_ALONGS_REQUIRED, type Recruit } from '../types';
-import UploadTrainingModal from '../components/UploadTrainingModal';
 import { isRecruitComplete } from '../lib/recruitStatus';
+import PageHeader from '../components/PageHeader';
 
 type SortKey = 'name' | 'hiringDate' | 'rideAlongs';
 type FilterKey = 'all' | 'active' | 'completed' | 'missingInfo' | 'incompleteTraining' | 'needsAdminInfo';
@@ -22,12 +22,11 @@ const COLS: { key: string; label: string; width: number; sticky?: boolean }[] = 
 ] as const;
 
 export default function Spreadsheet() {
-  const { state, auth } = useApp();
+  const { state } = useApp();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterKey>('all');
   const [sortKey, setSortKey] = useState<SortKey>('name');
   const [sortDir, setSortDir] = useState<1 | -1>(1);
-  const [uploadOpen, setUploadOpen] = useState(false);
 
   const filtered = useMemo(() => {
     let rows = [...state.recruits];
@@ -79,10 +78,10 @@ export default function Spreadsheet() {
     }
   }
 
-  const canUpload = auth.role === 'fto' || auth.role === 'admin';
-
   return (
-    <div className="p-4 max-w-[1600px] mx-auto">
+    <div>
+      <PageHeader title="Academy Training Management" subtitle="Academy Roster (Read-Only)" />
+      <div className="p-4 max-w-[1600px] mx-auto">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div>
           <h1 className="text-xl font-bold text-slate-100">Academy Roster</h1>
@@ -90,15 +89,6 @@ export default function Spreadsheet() {
             {filtered.length} recruit{filtered.length !== 1 ? 's' : ''} shown &middot; {state.recruits.length} total
           </p>
         </div>
-
-        {canUpload && (
-          <button
-            onClick={() => setUploadOpen(true)}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-md text-sm shadow"
-          >
-            + Upload Training
-          </button>
-        )}
       </div>
 
       {/* Toolbar */}
@@ -188,8 +178,7 @@ export default function Spreadsheet() {
         </span>
         <span className="flex items-center gap-1 text-amber-400 font-medium">⚠ Missing Academy Information</span>
       </div>
-
-      {uploadOpen && <UploadTrainingModal onClose={() => setUploadOpen(false)} />}
+      </div>
     </div>
   );
 }

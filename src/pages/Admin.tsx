@@ -4,10 +4,11 @@ import AddRecruitModal from '../components/AddRecruitModal';
 import EditRecruitModal from '../components/EditRecruitModal';
 import FtoManager from '../components/FtoManager';
 import TrainingHistoryPanel from '../components/TrainingHistoryPanel';
+import PageHeader from '../components/PageHeader';
 import { isRecruitComplete } from '../lib/recruitStatus';
 
 export default function Admin() {
-  const { state, auth } = useApp();
+  const { state } = useApp();
   const [addOpen, setAddOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -23,20 +24,15 @@ export default function Admin() {
 
   const needsInfoCount = state.recruits.filter((r) => r.needsAdminInfo).length;
 
-  if (auth.role !== 'admin') {
-    return (
-      <div className="p-8 max-w-lg mx-auto text-center">
-        <div className="text-3xl mb-2">🔒</div>
-        <h1 className="text-lg font-semibold text-slate-100 mb-1">Academy Leadership Only</h1>
-        <p className="text-sm text-slate-400">
-          Switch your role to "Academy Supervisor / Admin" in the top navigation to access this panel.
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="p-4 max-w-[1400px] mx-auto space-y-6">
+    <div>
+      <PageHeader
+        title="Academy Leadership Admin"
+        subtitle="Supervisor Panel — Recruits, FTOs, Intake & History"
+        badge="Supervisor"
+        badgeColor="bg-purple-600"
+      />
+      <div className="p-4 max-w-[1400px] mx-auto space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold text-slate-100">Academy Leadership Admin Panel</h1>
@@ -51,7 +47,7 @@ export default function Admin() {
           onClick={() => setAddOpen(true)}
           className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-md text-sm shadow"
         >
-          + Add Recruit
+          + Add Recruit (Intake)
         </button>
       </div>
 
@@ -126,6 +122,7 @@ export default function Admin() {
 
       {addOpen && <AddRecruitModal onClose={() => setAddOpen(false)} />}
       {editing && <EditRecruitModal recruit={editing} onClose={() => setEditingId(null)} />}
+      </div>
     </div>
   );
 }
