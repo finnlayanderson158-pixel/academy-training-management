@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  background: #0b1220;
+}
+
+/* Excel-style scrollbars for the spreadsheet */
+.sheet-scroll::-webkit-scrollbar {
+  height: 12px;
+  width: 12px;
+}
+.sheet-scroll::-webkit-scrollbar-track {
+  background: #e8ece5;
+}
+.sheet-scroll::-webkit-scrollbar-thumb {
+  background: #a9b8a0;
+  border-radius: 6px;
+  border: 2px solid #e8ece5;
+}
+.sheet-scroll::-webkit-scrollbar-thumb:hover {
+  background: #8fa085;
+}
