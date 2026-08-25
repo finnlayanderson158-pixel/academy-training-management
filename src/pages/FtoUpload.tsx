@@ -18,6 +18,9 @@ export default function FtoUpload() {
   const [selectedFtoId, setSelectedFtoId] = useState<string>('');
   const [showFtoNotFound, setShowFtoNotFound] = useState(false);
 
+  const [selectedTrainings, setSelectedTrainings] = useState<StandardTrainingKey[]>([]);
+  const [rideAlongDelta, setRideAlongDelta] = useState(0);
+
   const matches = useMemo(() => {
     if (!query.trim()) return [];
     return searchRecruits(query).slice(0, 8);
@@ -83,12 +86,19 @@ export default function FtoUpload() {
     pickFto(fto.id);
   }
 
-  function saveTraining(field: StandardTrainingKey | 'rideAlong') {
+  function toggleTraining(field: StandardTrainingKey) {
+    setSelectedTrainings((prev) =>
+      prev.includes(field) ? prev.filter((f) => f !== field) : [...prev, field]
+    );
+  }
+
+  function saveTraining() {
     if (!selectedRecruit || !selectedFto) return;
-    if (field === 'rideAlong') {
-      logRideAlong(selectedRecruit.id, selectedFto.id, selectedFto.name, 1);
-    } else {
+    for (const field of selectedTrainings) {
       logStandardTraining(selectedRecruit.id, field, selectedFto.id, selectedFto.name);
+    }
+    for (let i = 0; i < rideAlongDelta; i++) {
+      logRideAlong(selectedRecruit.id, selectedFto.id, selectedFto.name, 1);
     }
     setStep('done');
   }
@@ -101,6 +111,8 @@ export default function FtoUpload() {
     setFtoQuery('');
     setSelectedFtoId('');
     setShowFtoNotFound(false);
+    setSelectedTrainings([]);
+    setRideAlongDelta(0);
   }
 
   return (
@@ -207,24 +219,78 @@ export default function FtoUpload() {
               <div className="bg-sky-50 border border-sky-200 rounded-lg px-3 py-2 text-sm text-sky-800">
                 {selectedRecruit.name} &middot; FTO: <strong>{selectedFto?.name}</strong>
               </div>
-              <label className="block text-lg font-bold text-slate-800">What training did you complete?</label>
+              <label className="block text-lg font-bold text-slate-800">
+                What training did you complete? <span className="font-normal text-sm text-slate-400">(pick as many as you need)</span>
+              </label>
               <div className="grid grid-cols-2 gap-2">
-                {STANDARD_TRAININGS.map((t) => (
-                  <button
-                    key={t.key}
-                    onClick={() => saveTraining(t.key)}
-                    className="px-4 py-4 text-base font-semibold rounded-xl border-2 border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 text-slate-700"
-                  >
-                    {t.label}
-                  </button>
-                ))}
-                <button
-                  onClick={() => saveTraining('rideAlong')}
-                  className="col-span-2 px-4 py-4 text-base font-semibold rounded-xl border-2 border-orange-200 bg-orange-50 hover:border-orange-500 text-orange-800"
-                >
-                  Ride Along (+1) &middot; currently {selectedRecruit.rideAlongs}/{RIDE_ALONGS_REQUIRED}
-                </button>
+                {STANDARD_TRAININGS.map((t) => {
+                  const checked = selectedTrainings.includes(t.key);
+                  return (
+                    <button
+                      key={t.key}
+                      onClick={() => toggleTraining(t.key)}
+                      aria-pressed={checked}
+                      className={`px-4 py-4 text-base font-semibold rounded-xl border-2 text-left flex items-center gap-2 ${
+                        checked
+                          ? 'border-emerald-500 bg-emerald-50 text-emerald-800'
+                          : 'border-slate-200 text-slate-700 hover:border-emerald-300'
+                      }`}
+                    >
+                      <span
+                        className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${
+                          checked ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300'
+                        }`}
+                      >
+                        {checked ? '✓' : ''}
+                      </span>
+                      {t.label}
+                    </button>
+                  );
+                })}
               </div>
+
+              <div className="rounded-xl border-2 border-orange-200 bg-orange-50 px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-semibold text-orange-900">Ride Alongs</div>
+                    <div className="text-xs text-orange-700">
+                      Currently {selectedRecruit.rideAlongs}/{RIDE_ALONGS_REQUIRED}
+                      {rideAlongDelta > 0 && (
+                        <>
+                          {' '}
+                          &rarr; {Math.min(RIDE_ALONGS_REQUIRED, selectedRecruit.rideAlongs + rideAlongDelta)}/
+                          {RIDE_ALONGS_REQUIRED} after saving
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setRideAlongDelta((d) => Math.max(0, d - 1))}
+                      disabled={rideAlongDelta === 0}
+                      className="w-10 h-10 rounded-full border-2 border-orange-300 text-orange-700 font-bold text-xl flex items-center justify-center disabled:opacity-30"
+                    >
+                      &minus;
+                    </button>
+                    <span className="w-6 text-center font-bold text-orange-900 text-lg">{rideAlongDelta}</span>
+                    <button
+                      onClick={() => setRideAlongDelta((d) => Math.min(RIDE_ALONGS_REQUIRED - selectedRecruit.rideAlongs, d + 1))}
+                      disabled={selectedRecruit.rideAlongs + rideAlongDelta >= RIDE_ALONGS_REQUIRED}
+                      className="w-10 h-10 rounded-full border-2 border-orange-300 text-orange-700 font-bold text-xl flex items-center justify-center disabled:opacity-30"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={saveTraining}
+                disabled={selectedTrainings.length === 0 && rideAlongDelta === 0}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg py-3 rounded-xl disabled:bg-slate-300"
+              >
+                Save Training
+              </button>
             </div>
           )}
 

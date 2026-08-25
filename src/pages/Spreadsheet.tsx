@@ -97,7 +97,7 @@ export default function Spreadsheet() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by name, Discord, or hired by..."
-          className="border border-slate-700 bg-slate-800 text-slate-100 placeholder-slate-500 rounded-md px-3 py-2 text-sm w-72 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="border border-slate-700 bg-slate-800 text-slate-100 placeholder-slate-500 rounded-md px-3 py-2 text-sm w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-emerald-500"
         />
 
         <select

@@ -24,12 +24,12 @@ export default function TrainingHistoryPanel() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Filter by recruit, FTO, or training..."
-          className="border border-slate-700 bg-slate-800 text-slate-100 rounded-md px-3 py-1.5 text-sm w-72"
+          className="border border-slate-700 bg-slate-800 text-slate-100 rounded-md px-3 py-1.5 text-sm w-full sm:w-72"
         />
       </div>
 
-      <div className="overflow-auto max-h-[420px] border border-slate-800 rounded-md">
-        <table className="w-full text-sm">
+      <div className="sheet-scroll overflow-auto max-h-[420px] border border-slate-800 rounded-md">
+        <table className="w-full text-sm" style={{ minWidth: 680 }}>
           <thead className="sticky top-0 bg-slate-800 text-slate-300 text-xs uppercase">
             <tr>
               <th className="px-3 py-2 text-left">Recruit</th>
