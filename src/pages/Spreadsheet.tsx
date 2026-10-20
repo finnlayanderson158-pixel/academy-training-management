@@ -8,18 +8,18 @@ type SortKey = 'name' | 'hiringDate' | 'rideAlongs';
 type FilterKey = 'all' | 'active' | 'completed' | 'missingInfo' | 'incompleteTraining' | 'needsAdminInfo';
 type ViewMode = 'cards' | 'table';
 
-const COLS: { key: string; label: string; width: number; sticky?: boolean }[] = [
-  { key: 'name', label: 'NAME', width: 180, sticky: true },
-  { key: 'discordUsername', label: 'DISCORD USERNAME', width: 170 },
-  { key: 'hiringDate', label: 'HIRING DATE', width: 130 },
-  { key: 'hiredBy', label: 'HIRED BY', width: 150 },
-  { key: 'macrosTraining', label: 'MACROS TRAINING', width: 130 },
-  { key: 'taserTraining', label: 'TASER TRAINING', width: 130 },
-  { key: 'rideAlongs', label: 'RIDE ALONGS', width: 120 },
-  { key: 'drivingTest', label: 'DRIVING TEST', width: 120 },
-  { key: 'shieldTraining', label: 'SHIELD TRAINING', width: 130 },
-  { key: 'passive', label: 'PASSIVE', width: 100 },
-  { key: 'aggressive', label: 'AGGRESSIVE', width: 110 },
+const COLS: { key: string; label: string; width: number }[] = [
+  { key: 'name', label: 'NAME', width: 160 },
+  { key: 'discordUsername', label: 'DISCORD USERNAME', width: 160 },
+  { key: 'hiringDate', label: 'HIRING DATE', width: 120 },
+  { key: 'hiredBy', label: 'HIRED BY', width: 140 },
+  { key: 'macrosTraining', label: 'MACROS TRAINING', width: 120 },
+  { key: 'taserTraining', label: 'TASER TRAINING', width: 120 },
+  { key: 'rideAlongs', label: 'RIDE ALONGS', width: 110 },
+  { key: 'drivingTest', label: 'DRIVING TEST', width: 110 },
+  { key: 'shieldTraining', label: 'SHIELD TRAINING', width: 120 },
+  { key: 'passive', label: 'PASSIVE', width: 95 },
+  { key: 'aggressive', label: 'AGGRESSIVE', width: 105 },
 ] as const;
 
 function getCompletedTrainingsCount(r: Recruit): number {
@@ -252,15 +252,15 @@ export default function Spreadsheet() {
           </div>
         ) : (
           <div>
-            {/* Mobile Scroll Hint (visible on small/medium screens) */}
+            {/* Mobile Scroll Hint */}
             <div className="block lg:hidden mb-1.5 text-[11px] text-slate-400 font-medium px-1 flex items-center justify-between">
-              <span>← Swipe table horizontally to see all columns →</span>
-              <span className="text-emerald-400 font-normal">Name column is frozen</span>
+              <span>← Swipe horizontally to scroll the entire spreadsheet →</span>
+              <span className="text-slate-500 font-normal">All 11 columns</span>
             </div>
 
             {/* Spreadsheet Table */}
-            <div className="sheet-scroll overflow-auto rounded-lg border border-[#8fa085] shadow-xl max-h-[75vh]">
-              <table className="border-collapse text-sm" style={{ minWidth: 1350 }}>
+            <div className="sheet-scroll overflow-x-auto rounded-lg border border-[#8fa085] shadow-xl w-full">
+              <table className="border-collapse text-sm w-full" style={{ minWidth: 1200 }}>
                 <thead>
                   <tr>
                     {COLS.map((col) => (
@@ -270,9 +270,9 @@ export default function Spreadsheet() {
                           col.key === 'name' || col.key === 'hiringDate' ? toggleSort(col.key as SortKey) : undefined
                         }
                         className={`bg-[#d7e4cf] text-[#2e3d27] font-bold text-xs uppercase tracking-wide border border-[#a9b8a0] px-2.5 py-2.5 text-left whitespace-nowrap ${
-                          col.sticky ? 'sticky left-0 z-20 bg-[#c9dcc0] shadow-[2px_0_4px_rgba(0,0,0,0.06)]' : ''
-                        } ${col.key === 'name' || col.key === 'hiringDate' ? 'cursor-pointer select-none' : ''}`}
-                        style={{ minWidth: col.width, position: col.sticky ? 'sticky' : undefined, top: 0 }}
+                          col.key === 'name' || col.key === 'hiringDate' ? 'cursor-pointer select-none' : ''
+                        }`}
+                        style={{ minWidth: col.width, width: col.width }}
                       >
                         {col.label}
                         {sortKey === col.key ? (sortDir === 1 ? ' ▲' : ' ▼') : ''}
@@ -346,10 +346,7 @@ function RideAlongCell({ count }: { count: number }) {
 function RecruitRow({ recruit, zebra }: { recruit: Recruit; zebra: boolean }) {
   return (
     <tr className={zebra ? 'bg-white' : 'bg-[#f4f7f1]'}>
-      <td
-        className="sticky left-0 z-10 border border-[#c7d0c0] px-3 py-2 font-semibold text-slate-800 whitespace-nowrap shadow-[2px_0_4px_rgba(0,0,0,0.06)]"
-        style={{ background: zebra ? '#ffffff' : '#f4f7f1' }}
-      >
+      <td className="border border-[#c7d0c0] px-3 py-2 font-semibold text-slate-800 whitespace-nowrap">
         {recruit.name}
         {recruit.needsAdminInfo && (
           <span className="ml-2 text-[10px] text-amber-600 font-bold align-middle" title="Missing Academy Information">
@@ -357,13 +354,13 @@ function RecruitRow({ recruit, zebra }: { recruit: Recruit; zebra: boolean }) {
           </span>
         )}
       </td>
-      <td className="border border-[#c7d0c0] px-2.5 py-2 text-slate-700">
+      <td className="border border-[#c7d0c0] px-2.5 py-2 text-slate-700 whitespace-nowrap">
         {recruit.discordUsername ?? <span className="text-slate-400 italic">Not Added</span>}
       </td>
-      <td className="border border-[#c7d0c0] px-2.5 py-2 text-slate-700">
+      <td className="border border-[#c7d0c0] px-2.5 py-2 text-slate-700 whitespace-nowrap">
         {recruit.hiringDate ?? <span className="text-slate-400 italic">Not Added</span>}
       </td>
-      <td className="border border-[#c7d0c0] px-2.5 py-2 text-slate-700">
+      <td className="border border-[#c7d0c0] px-2.5 py-2 text-slate-700 whitespace-nowrap">
         {recruit.hiredBy ?? <span className="text-slate-400 italic">Not Added</span>}
       </td>
       <StatusCell done={recruit.macrosTraining} />
